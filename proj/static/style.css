@@ -1,0 +1,447 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.95) 50%, rgba(255, 255, 255, 0) 100%),
+    url('https://kavyaschool.edu.np/images/kavya-building-final.png') right center / contain no-repeat,
+    linear-gradient(135deg, #0a66b2 0%, #47ad48 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+  padding: 20px;
+}
+
+body.dark {
+  background: 
+    linear-gradient(to right, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 0.95) 50%, rgba(26, 26, 46, 0) 100%),
+    url('https://kavyaschool.edu.np/images/kavya-building-final.png') right center / contain no-repeat,
+    linear-gradient(135deg, #e83f35 0%, #0a66b2 100%);
+}
+
+.calculator {
+  width: 480px;
+  max-width: 95vw;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  position: relative;
+  border: 4px solid transparent;
+  background-clip: padding-box;
+}
+
+.calculator::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: linear-gradient(135deg, #e83f35 0%, #f8a023 25%, #0a66b2 50%, #47ad48 100%);
+  border-radius: 20px;
+  z-index: -1;
+}
+
+body.dark .calculator {
+  background: #2d2d44;
+  color: white;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #e83f35 0%, #f8a023 50%, #0a66b2 80%, #47ad48 100%);
+}
+
+body.dark .topbar {
+  background: linear-gradient(135deg, #0a66b2 0%, #e83f35 50%, #f8a023 80%, #47ad48 100%);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 5px 15px;
+  border-radius: 10px;
+}
+
+.logo-img {
+  height: 30px;
+  width: auto;
+}
+
+body.dark .logo {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+body.dark .logo-img {
+  filter: none;
+}
+
+.controls {
+  display: flex;
+  gap: 15px;
+}
+
+.mic-btn,
+.switch {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 20px;
+}
+
+.mic-btn:hover,
+.switch:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+body.dark .mic-btn,
+body.dark .switch {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+body.dark .mic-btn:hover,
+body.dark .switch:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.display {
+  padding: 30px 20px;
+  text-align: right;
+  min-height: 120px;
+}
+
+.expression {
+  font-size: 18px;
+  color: #999;
+  margin-bottom: 10px;
+  min-height: 30px;
+}
+
+body.dark .expression {
+  color: #666;
+}
+
+.result {
+  font-size: 48px;
+  font-weight: bold;
+  color: #333;
+  word-break: break-all;
+}
+
+body.dark .result {
+  color: #fff;
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: #f0f0f0;
+  padding: 1px;
+}
+
+body.dark .keys {
+  background: #1a1a2e;
+}
+
+.keys button {
+  border: none;
+  background: white;
+  padding: 25px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+body.dark .keys button {
+  background: #2d2d44;
+  color: white;
+}
+
+.keys button:hover {
+  background: #f5f5f5;
+}
+
+body.dark .keys button:hover {
+  background: #3d3d54;
+}
+
+.keys button:active {
+  transform: scale(0.95);
+}
+
+.num {
+  color: #333;
+  background: linear-gradient(135deg, rgba(71, 173, 72, 0.1) 0%, rgba(10, 102, 178, 0.1) 100%);
+}
+
+body.dark .num {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(10, 102, 178, 0.2) 0%, rgba(71, 173, 72, 0.2) 100%);
+}
+
+.op {
+  color: white;
+  background: #0a66b2;
+  font-weight: bold;
+}
+
+.op:hover {
+  background: #084d87;
+}
+
+body.dark .op {
+  color: white;
+  background: #f8a023;
+}
+
+body.dark .op:hover {
+  background: #d6891f;
+}
+
+.clear {
+  color: white;
+  background: #e83f35;
+  font-weight: bold;
+}
+
+.clear:hover {
+  background: #c9342c;
+}
+
+.backspace {
+  color: white;
+  background: #f8a023;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.backspace:hover {
+  background: #d6891f;
+}
+
+body.dark .backspace {
+  color: white;
+  background: #f8a023;
+}
+
+.eq {
+  grid-column: span 1;
+  background: #47ad48;
+  color: white;
+  font-weight: bold;
+}
+
+body.dark .eq {
+  background: linear-gradient(135deg, #47ad48 0%, #0a66b2 100%);
+}
+
+.eq:hover {
+  background: #3d9840;
+}
+
+body.dark .eq:hover {
+  background: linear-gradient(135deg, #3d9840 0%, #084d87 100%);
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+/* Mic Panel Styles */
+.mic-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(100%);
+  transition: transform 0.3s;
+  padding: 40px;
+}
+
+body.dark .mic-panel {
+  background: rgba(45, 45, 68, 0.98);
+}
+
+.mic-panel.active {
+  transform: translateY(0);
+}
+
+.exit {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px;
+  transition: all 0.3s;
+}
+
+.exit:hover {
+  background: rgba(231, 76, 60, 0.2);
+  transform: rotate(90deg);
+}
+
+.mic-panel h2 {
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, #e83f35 0%, #f8a023 25%, #0a66b2 75%, #47ad48 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+body.dark .mic-panel h2 {
+  background: linear-gradient(135deg, #f8a023 0%, #e83f35 25%, #47ad48 75%, #0a66b2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.waves {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 30px;
+}
+
+.wave {
+  width: 8px;
+  height: 40px;
+  background: #0a66b2;
+  border-radius: 4px;
+  animation: wave 1s ease-in-out infinite;
+  opacity: 0.3;
+}
+
+.wave:nth-child(1) { background: #e83f35; }
+.wave:nth-child(2) { background: #f8a023; }
+.wave:nth-child(3) { background: #0a66b2; }
+.wave:nth-child(4) { background: #47ad48; }
+.wave:nth-child(5) { background: #e83f35; }
+
+body.dark .wave {
+  background: #f8a023;
+}
+
+body.dark .wave:nth-child(1) { background: #f8a023; }
+body.dark .wave:nth-child(2) { background: #e83f35; }
+body.dark .wave:nth-child(3) { background: #47ad48; }
+body.dark .wave:nth-child(4) { background: #0a66b2; }
+body.dark .wave:nth-child(5) { background: #f8a023; }
+
+.waves.listening .wave {
+  opacity: 1;
+}
+
+.wave:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.wave:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.wave:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.wave:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.wave:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: scaleY(0.5);
+  }
+  50% {
+    transform: scaleY(1.5);
+  }
+}
+
+.listen-btn {
+  background: linear-gradient(135deg, #e83f35 0%, #f8a023 25%, #0a66b2 75%, #47ad48 100%);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 30px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(10, 102, 178, 0.4);
+}
+
+body.dark .listen-btn {
+  background: linear-gradient(135deg, #47ad48 0%, #0a66b2 25%, #f8a023 75%, #e83f35 100%);
+}
+
+.listen-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.listen-btn:active {
+  transform: translateY(0);
+}
+
+.listen-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.voice-result {
+  margin-top: 20px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  max-width: 280px;
+  word-wrap: break-word;
+}
+
+body.dark .voice-result {
+  color: #999;
+}
+
+#mic-status {
+  text-align: center;
+}

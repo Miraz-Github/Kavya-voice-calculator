@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Calculator</title>
+</head>
+<body>
+
+<div class="calculator">
+
+  <div class="topbar">
+    <div class="logo">
+      <img src="https://kavyaschool.edu.np/images/kavya-text.svg" alt="Kavya School" class="logo-img">
+    </div>
+    <div class="controls">
+      <div class="mic-btn" onclick="openMic()">🎤</div>
+      <div class="switch" onclick="toggleTheme()">🌙</div>
+    </div>
+  </div>
+
+  <div class="display">
+    <div class="expression" id="expr"></div>
+    <div class="result" id="res">0</div>
+  </div>
+
+  <div class="keys">
+    <button class="clear" onclick="clearAll()">C</button>
+    <button class="backspace" onclick="backspace()">⌫</button>
+    <button class="op" onclick="add('/')">÷</button>
+    <button class="op" onclick="add('*')">×</button>
+
+    <button class="num" onclick="add('7')">7</button>
+    <button class="num" onclick="add('8')">8</button>
+    <button class="num" onclick="add('9')">9</button>
+    <button class="op" onclick="add('-')">−</button>
+
+    <button class="num" onclick="add('4')">4</button>
+    <button class="num" onclick="add('5')">5</button>
+    <button class="num" onclick="add('6')">6</button>
+    <button class="op" onclick="add('+')">+</button>
+
+    <button class="num" onclick="add('1')">1</button>
+    <button class="num" onclick="add('2')">2</button>
+    <button class="num" onclick="add('3')">3</button>
+    <button class="op" onclick="add('**')">xʸ</button>
+
+    <button class="num span-2" onclick="add('0')">0</button>
+    <button class="num" onclick="add('.')">.</button>
+    <button class="eq" onclick="calculate()">=</button>
+  </div>
+
+  <div class="mic-panel" id="mic">
+    <div class="exit" onclick="closeMic()">✕</div>
+    <h2 id="mic-status">Click to start listening</h2>
+    <div class="waves" id="waves">
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+    </div>
+    <button class="listen-btn" id="listenBtn" onclick="startListening()">🎤 Start Listening</button>
+    <div class="voice-result" id="voiceResult"></div>
+  </div>
+
+</div>
+
+<script>
+let expression = "";
+let isListening = false;
+
+function add(v) {
+  expression += v;
+  update();
+}
+
+function clearAll() {
+  expression = "";
+  update();
+}
+
+function backspace() {
+  expression = expression.slice(0, -1);
+  update();
+}
+
+function calculate() {
+  try {
+    expression = eval(expression).toString();
+  } catch {
+    expression = "Error";
+  }
+  update();
+}
+
+function update() {
+  document.getElementById('expr').innerText = expression;
+  document.getElementById('res').innerText = expression || 0;
+}
+
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+}
+
+function openMic() {
+  document.getElementById('mic').classList.add('active');
+  document.getElementById('mic-status').innerText = 'Click to start listening';
+  document.getElementById('voiceResult').innerText = '';
+}
+
+function closeMic() {
+  document.getElementById('mic').classList.remove('active');
+  isListening = false;
+  document.getElementById('waves').classList.remove('listening');
+  document.getElementById('listenBtn').disabled = false;
+}
+
+async function startListening() {
+  if (isListening) return;
+  
+  isListening = true;
+  const statusEl = document.getElementById('mic-status');
+  const resultEl = document.getElementById('voiceResult');
+  const wavesEl = document.getElementById('waves');
+  const btnEl = document.getElementById('listenBtn');
+  
+  statusEl.innerText = 'Listening... Speak your calculation';
+  resultEl.innerText = '';
+  wavesEl.classList.add('listening');
+  btnEl.disabled = true;
+  
+  try {
+    const response = await fetch('/api/listen', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      statusEl.innerText = 'Calculation complete!';
+      resultEl.innerText = `You said: "${data.text}"`;
+      
+      // Update calculator display
+      expression = data.result;
+      update();
+      
+      // Close mic panel after 2 seconds
+      setTimeout(() => {
+        closeMic();
+      }, 2000);
+      
+    } else {
+      statusEl.innerText = 'Error: ' + (data.error || 'Unknown error');
+      resultEl.innerText = data.text ? `Heard: "${data.text}"` : '';
+      btnEl.disabled = false;
+    }
+    
+  } catch (error) {
+    statusEl.innerText = 'Connection error. Make sure the server is running.';
+    resultEl.innerText = error.message;
+    btnEl.disabled = false;
+  }
+  
+  wavesEl.classList.remove('listening');
+  isListening = false;
+}
+
+// Allow Enter key to calculate
+document.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    calculate();
+  }
+});
+
+// Allow Backspace key to delete
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    backspace();
+  }
+});
+</script>
+
+</body>
+</html>
