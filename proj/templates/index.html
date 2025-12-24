@@ -8,11 +8,22 @@
 </head>
 <body>
 
-<div class="calculator">
+<div class="app-layout">
 
+<div class="page-topbar">
+  <img src="https://kavyaschool.edu.np/images/Kavya-Ing.svg" alt="Kavya School" class="logo-img">
+  <div class="page-title"> Voice Calculator</div>
+</div>
+
+  <div class="history-panel">
+    <h3>History</h3>
+    <ul id="historyList"></ul>
+  </div>
+
+<div class="calculator">
   <div class="topbar">
-    <div class="logo">
-      <img src="https://kavyaschool.edu.np/images/kavya-text.svg" alt="Kavya School" class="logo-img">
+    <div class="toggleHistory">
+      <button class="history-toggle" onclick="toggleHistory()">📜</button>
     </div>
     <div class="controls">
       <div class="mic-btn" onclick="openMic()">🎤</div>
@@ -66,10 +77,41 @@
   </div>
 
 </div>
+</div>
 
 <script>
+
+function toggleHistory() {
+  const history = document.querySelector('.history-panel');
+  const layout = document.querySelector('.app-layout');
+
+  history.classList.toggle('hidden');
+  layout.classList.toggle('full');
+}
+
+
 let expression = "";
+let history = [];
 let isListening = false;
+
+
+function addToHistory(expr, result) {
+  
+
+  history.unshift({ expr, result });
+
+  const list = document.getElementById("historyList");
+  list.innerHTML = "";
+
+  history.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = `${item.expr} = ${item.result}`;
+    list.appendChild(li);
+  });
+
+  
+}
+
 
 function add(v) {
   expression += v;
@@ -86,14 +128,20 @@ function backspace() {
   update();
 }
 
+
 function calculate() {
   try {
-    expression = eval(expression).toString();
+    const prev = expression;
+    const result = eval(expression).toString();
+
+    expression = result;
+    addToHistory(prev, result);
   } catch {
     expression = "Error";
   }
   update();
 }
+
 
 function update() {
   document.getElementById('expr').innerText = expression;
@@ -126,6 +174,7 @@ async function startListening() {
   const wavesEl = document.getElementById('waves');
   const btnEl = document.getElementById('listenBtn');
   
+  
   statusEl.innerText = 'Listening... Speak your calculation';
   resultEl.innerText = '';
   wavesEl.classList.add('listening');
@@ -145,11 +194,9 @@ async function startListening() {
       statusEl.innerText = 'Calculation complete!';
       resultEl.innerText = `You said: "${data.text}"`;
       
-      // Update calculator display
       expression = data.result;
       update();
       
-      // Close mic panel after 2 seconds
       setTimeout(() => {
         closeMic();
       }, 2000);
@@ -166,18 +213,22 @@ async function startListening() {
     btnEl.disabled = false;
   }
   
+  if (data.success) {
+  expression = data.result;
+  addToHistory(data.expression, data.result);
+  update();
+}
+
   wavesEl.classList.remove('listening');
   isListening = false;
 }
 
-// Allow Enter key to calculate
 document.addEventListener('keypress', function(e) {
   if (e.key === 'Enter') {
     calculate();
   }
 });
 
-// Allow Backspace key to delete
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Backspace') {
     e.preventDefault();

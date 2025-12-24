@@ -1,3 +1,98 @@
+.app-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 30px;
+}
+
+.app-layout.full {
+  grid-template-columns: 1fr;
+}
+
+.history-panel.hidden {
+  display: none;
+}
+
+.calculator {
+  margin: 0 auto;
+}
+
+
+/* ===== PAGE TOPBAR ===== */
+.page-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: #f8f6f6;
+  color: #47ac48;
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  z-index: 1000;
+  gap: 15px;
+}
+
+
+/* ===== MAIN LAYOUT ===== */
+.app-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  align-items: start;
+  width: 100%;
+  padding: 10px 40px;
+  gap: 30px;
+}
+
+
+/* ===== HISTORY SIDEBAR ===== */
+.history-panel {
+  width: 260px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+body.dark .history-panel {
+  background: #1a1a2e;
+  color: white;
+}
+
+.history-panel h3 {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.history-panel ul {
+  list-style: none;
+}
+
+.history-panel li {
+  padding: 8px 10px;
+  border-bottom: 1px solid #ddd;
+  font-size: 0.95rem;
+}
+
+body.dark .history-panel li {
+  border-color: #333;
+}
+
+/* Push calculator right */
+.calculator {
+  margin-left: 0;
+}
+
+.logo {
+  margin-left: auto;
+  transform: scale(1);  /* 👈 zoom in */
+}
+
+
 * {
   margin: 0;
   padding: 0;
@@ -115,12 +210,12 @@ body.dark .logo-img {
 
 body.dark .mic-btn,
 body.dark .switch {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(19, 14, 14, 0.9);
 }
 
 body.dark .mic-btn:hover,
 body.dark .switch:hover {
-  background: rgba(255, 255, 255, 1);
+  background: rgb(36, 27, 27);
 }
 
 .display {
@@ -201,7 +296,7 @@ body.dark .num {
 }
 
 .op {
-  color: white;
+  color: rgb(255, 0, 0);
   background: #0a66b2;
   font-weight: bold;
 }
@@ -220,7 +315,7 @@ body.dark .op:hover {
 }
 
 .clear {
-  color: white;
+  color: rgb(212, 11, 11);
   background: #e83f35;
   font-weight: bold;
 }
@@ -230,7 +325,7 @@ body.dark .op:hover {
 }
 
 .backspace {
-  color: white;
+  color: rgb(201, 13, 13);
   background: #f8a023;
   font-weight: bold;
   font-size: 20px;
@@ -248,7 +343,7 @@ body.dark .backspace {
 .eq {
   grid-column: span 1;
   background: #47ad48;
-  color: white;
+  color: red;
   font-weight: bold;
 }
 
@@ -268,7 +363,6 @@ body.dark .eq:hover {
   grid-column: span 2;
 }
 
-/* Mic Panel Styles */
 .mic-panel {
   position: absolute;
   top: 0;
