@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Calculator</title>
+</head>
+<body>
+
+<div class="app-layout">
+
+<div class="page-topbar">
+  <img src="https://kavyaschool.edu.np/images/Kavya-Ing.svg" alt="Kavya School" class="logo-img">
+  <div class="page-title"> Voice Calculator</div>
+  <div class="keyword-status" id="keywordStatus" style="margin-left: auto; font-size: 0.9rem; opacity: 0.7;">
+    🎤 Listening for "start calculation" or "listen"
+  </div>
+</div>
+
+  <div class="history-panel">
+    <h3>History</h3>
+    <ul id="historyList"></ul>
+  </div>
+
+<div class="calculator">
+  <div class="topbar">
+    <div class="toggleHistory">
+      <button class="history-toggle" onclick="toggleHistory()">📜</button>
+    </div>
+    <div class="controls">
+      <div class="mic-btn" onclick="openMic()">🎤</div>
+      <div class="switch" onclick="toggleTheme()">🌙</div>
+    </div>
+  </div>
+
+  <div class="display">
+    <div class="expression" id="expr"></div>
+    <div class="result" id="res">0</div>
+  </div>
+
+  <div class="keys">
+    <button class="clear" onclick="clearAll()">C</button>
+    <button class="backspace" onclick="backspace()">⌫</button>
+    <button class="op" onclick="add('/')">÷</button>
+    <button class="op" onclick="add('*')">×</button>
+
+    <button class="num" onclick="add('7')">7</button>
+    <button class="num" onclick="add('8')">8</button>
+    <button class="num" onclick="add('9')">9</button>
+    <button class="op" onclick="add('-')">−</button>
+
+    <button class="num" onclick="add('4')">4</button>
+    <button class="num" onclick="add('5')">5</button>
+    <button class="num" onclick="add('6')">6</button>
+    <button class="op" onclick="add('+')">+</button>
+
+    <button class="num" onclick="add('1')">1</button>
+    <button class="num" onclick="add('2')">2</button>
+    <button class="num" onclick="add('3')">3</button>
+    <button class="op" onclick="add('**')">xʸ</button>
+
+    <button class="num span-2" onclick="add('0')">0</button>
+    <button class="num" onclick="add('.')">.</button>
+    <button class="eq" onclick="calculate()">=</button>
+  </div>
+
+  <div class="mic-panel" id="mic">
+    <div class="exit" onclick="closeMic()">✕</div>
+    <h2 id="mic-status">Click to start listening</h2>
+    <div class="waves" id="waves">
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+      <div class="wave"></div>
+    </div>
+    <button class="listen-btn" id="listenBtn" onclick="startListening()">🎤 Start Listening</button>
+    <div class="voice-result" id="voiceResult"></div>
+  </div>
+
+  <div class="version-box">Version 1.3</div>
+
+</div>
+</div>
+
+<script>
+
+function toggleHistory() {
+  const history = document.querySelector('.history-panel');
+  const layout = document.querySelector('.app-layout');
+
+  history.classList.toggle('hidden');
+  layout.classList.toggle('full');
+}
+
+
+let expression = "";
+let history = [];
+let isListening = false;
+
+// ===== KEYWORD DETECTION =====
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let keywordRecognition = null;
+let isKeywordListening = false;
+const keywords = ['start calculation', 'start listening', 'listen', 'calculate', 'calculator'];
+
+function updateKeywordStatus(message, isActive = false) {
+  const statusEl = document.getElementById('keywordStatus');
+  if (statusEl) {
+    statusEl.textContent = message;
+    statusEl.style.color = isActive ? '#47ad48' : '#666';
+  }
+  console.log(message);
+}
+
+function initKeywordDetection() {
+  if (!SpeechRecognition) {
+    updateKeywordStatus('⚠️ Speech Recognition not supported in this browser');
+    return;
+  }
+
+  keywordRecognition = new SpeechRecognition();
+  keywordRecognition.continuous = true;
+  keywordRecognition.interimResults = false;
+  keywordRecognition.lang = 'en-US';
+
+  keywordRecognition.onstart = () => {
+    isKeywordListening = true;
+    updateKeywordStatus('🎤 Listening for "start calculation" or "listen"...', true);
+  };
+
+  keywordRecognition.onresult = (event) => {
+    const last = event.results.length - 1;
+    const text = event.results[last][0].transcript.toLowerCase().trim();
+    console.log('👂 Heard:', text);
+
+    const keywordFound = keywords.some(keyword => text.includes(keyword));
+    
+    if (keywordFound && !isListening) {
+      console.log('✅ Keyword detected! Starting calculation...');
+      updateKeywordStatus('✅ Keyword detected! Opening mic...', true);
+      keywordRecognition.stop();
+      isKeywordListening = false;
+      openMic();
+      setTimeout(() => startListening(), 500);
+    }
+  };
+
+  keywordRecognition.onerror = (event) => {
+    console.error('❌ Recognition error:', event.error);
+    
+    if (event.error === 'not-allowed') {
+      updateKeywordStatus('⚠️ Microphone permission denied. Click to allow.');
+      return;
+    }
+    
+    // Auto-restart on most errors
+    if (event.error !== 'aborted') {
+      setTimeout(() => {
+        if (isKeywordListening && !isListening) {
+          console.log('🔄 Restarting keyword detection...');
+          try { keywordRecognition.start(); } catch(e) {}
+        }
+      }, 1000);
+    }
+  };
+
+  keywordRecognition.onend = () => {
+    console.log('⏸️ Keyword detection ended');
+    if (isKeywordListening && !isListening) {
+      console.log('🔄 Auto-restarting keyword detection...');
+      setTimeout(() => {
+        try { 
+          keywordRecognition.start(); 
+        } catch(e) {
+          console.error('Failed to restart:', e);
+        }
+      }, 500);
+    }
+  };
+
+  console.log('🚀 Starting keyword detection...');
+  try {
+    keywordRecognition.start();
+  } catch(e) {
+    console.error('❌ Failed to start keyword detection:', e);
+    updateKeywordStatus('⚠️ Click here to enable keyword listening');
+  }
+}
+
+// Start keyword detection on page load
+window.addEventListener('DOMContentLoaded', () => {
+  console.log('📄 Page loaded, initializing keyword detection...');
+  setTimeout(initKeywordDetection, 1000);
+});
+
+// Restart keyword detection when page becomes visible
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && isKeywordListening && !isListening) {
+    console.log('👁️ Page visible again, restarting keyword detection...');
+    setTimeout(() => {
+      try { keywordRecognition.start(); } catch(e) {}
+    }, 500);
+  }
+});
+
+// Click on status to manually restart if needed
+document.addEventListener('DOMContentLoaded', () => {
+  const statusEl = document.getElementById('keywordStatus');
+  if (statusEl) {
+    statusEl.style.cursor = 'pointer';
+    statusEl.onclick = () => {
+      if (!isKeywordListening) {
+        console.log('👆 Manual restart requested...');
+        initKeywordDetection();
+      }
+    };
+  }
+});
+// ===== END KEYWORD DETECTION =====
+
+
+function addToHistory(expr, result) {
+  
+
+  history.unshift({ expr, result });
+
+  const list = document.getElementById("historyList");
+  list.innerHTML = "";
+
+  history.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = `${item.expr} = ${item.result}`;
+    list.appendChild(li);
+  });
+
+  
+}
+
+
+function add(v) {
+  expression += v;
+  update();
+}
+
+function clearAll() {
+  expression = "";
+  update();
+}
+
+function backspace() {
+  expression = expression.slice(0, -1);
+  update();
+}
+
+
+function calculate() {
+  try {
+    const prev = expression;
+    const result = eval(expression).toString();
+
+    expression = result;
+    addToHistory(prev, result);
+  } catch {
+    expression = "Error";
+  }
+  update();
+}
+
+
+function update() {
+  document.getElementById('expr').innerText = expression;
+  document.getElementById('res').innerText = expression || 0;
+}
+
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+}
+
+function openMic() {
+  document.getElementById('mic').classList.add('active');
+  document.getElementById('mic-status').innerText = 'Click to start listening';
+  document.getElementById('voiceResult').innerText = '';
+}
+
+function closeMic() {
+  document.getElementById('mic').classList.remove('active');
+  isListening = false;
+  document.getElementById('waves').classList.remove('listening');
+  document.getElementById('listenBtn').disabled = false;
+  
+  // Restart keyword listening
+  setTimeout(() => {
+    if (keywordRecognition && isKeywordListening) {
+      try { keywordRecognition.start(); } catch(e) {}
+    }
+  }, 1000);
+}
+
+async function startListening() {
+  if (isListening) return;
+  
+  isListening = true;
+  const statusEl = document.getElementById('mic-status');
+  const resultEl = document.getElementById('voiceResult');
+  const wavesEl = document.getElementById('waves');
+  const btnEl = document.getElementById('listenBtn');
+  
+  
+  statusEl.innerText = 'Listening... Speak your calculation';
+  resultEl.innerText = '';
+  wavesEl.classList.add('listening');
+  btnEl.disabled = true;
+  
+  try {
+    const response = await fetch('/api/listen', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      statusEl.innerText = 'Calculation complete!';
+      resultEl.innerText = `You said: "${data.text}"`;
+      
+      expression = data.result;
+      update();
+      
+      setTimeout(() => {
+        closeMic();
+      }, 2000);
+      
+    } else {
+      statusEl.innerText = 'Error: ' + (data.error || 'Unknown error');
+      resultEl.innerText = data.text ? `Heard: "${data.text}"` : '';
+      btnEl.disabled = false;
+    }
+    
+  } catch (error) {
+    statusEl.innerText = 'Connection error. Make sure the server is running.';
+    resultEl.innerText = error.message;
+    btnEl.disabled = false;
+  }
+  
+  if (data.success) {
+  expression = data.result;
+  addToHistory(data.expression, data.result);
+  update();
+}
+
+  wavesEl.classList.remove('listening');
+  isListening = false;
+}
+
+document.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    calculate();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    backspace();
+  }
+});
+</script>
+
+</body>
+</html>
